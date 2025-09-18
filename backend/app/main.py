@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from .api.v1 import health, events
+from .api.v1 import health, events, ws
 
 app = FastAPI(title="EdgeIQ Ingest API")
 
@@ -11,3 +11,4 @@ app.add_middleware(
 
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(events.router, prefix="/api/v1")
+app.include_router(ws.router, prefix="/api/v1")
