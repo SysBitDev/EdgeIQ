@@ -32,5 +32,18 @@ services:
       backend:
         condition: service_started
 
+  agent:
+    build: ../edge-agent
+    environment:
+      API_URL: http://backend:8000/api/v1/events
+      TENANT: demo
+      AGENT_ID: dev-mac
+      SECRET: dev-secret
+      BATCH: 5
+      INTERVAL: 3
+    depends_on:
+      backend:
+        condition: service_started
+
 volumes:
   pgdata: {}
