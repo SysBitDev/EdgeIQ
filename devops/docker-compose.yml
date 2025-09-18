@@ -11,7 +11,7 @@ services:
   backend:
     build: ../backend
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/edgeiq
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/edgeiq
     ports: ["8000:8000"]
     depends_on: [postgres]
 
