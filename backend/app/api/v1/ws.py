@@ -1,6 +1,7 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from typing import Set
 import logging
+from typing import Set
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 router = APIRouter(tags=["ws"])
 log = logging.getLogger("ws")
