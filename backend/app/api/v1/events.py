@@ -1,9 +1,11 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from typing import List
-from ...schemas.event import EventIn
+
+from ...db import Base, SessionLocal, engine
 from ...models.event import Event
-from ...db import SessionLocal, Base, engine
+from ...schemas.event import EventIn
 
 router = APIRouter(tags=["events"])
 

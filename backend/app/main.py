@@ -1,12 +1,11 @@
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from .api.v1 import health, events, ws
+from starlette.middleware.cors import CORSMiddleware
+
+from .api.v1 import events, health, ws
 
 app = FastAPI(title="EdgeIQ Ingest API")
-app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
-)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
 @app.get("/")
