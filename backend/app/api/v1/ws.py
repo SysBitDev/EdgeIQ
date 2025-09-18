@@ -1,6 +1,12 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from typing import Set
+import logging
+
 router = APIRouter(tags=["ws"])
-clients: set[WebSocket] = set()
+log = logging.getLogger("ws")
+
+clients: Set[WebSocket] = set()
+
 
 @router.websocket("/ws/telemetry")
 async def ws_telemetry(ws: WebSocket):
@@ -8,13 +14,18 @@ async def ws_telemetry(ws: WebSocket):
     clients.add(ws)
     try:
         while True:
-            await ws.receive_text()  # noop ping
+            await ws.receive_text()
     except WebSocketDisconnect:
         clients.discard(ws)
 
+
 async def broadcast(event: dict):
-    dead=[]
+    dead = []
     for c in list(clients):
-        try: await c.send_json(event)
-        except: dead.append(c)
-    for d in dead: clients.discard(d)
+        try:
+            await c.send_json(event)
+        except Exception as exc:
+            log.debug("Broadcast to client failed: %r", exc)
+            dead.append(c)
+    for d in dead:
+        clients.discard(d)
