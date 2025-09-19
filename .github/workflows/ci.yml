@@ -1,31 +1,109 @@
 name: CI
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: write
+
 jobs:
-  backend:
+  backend-format:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        working-directory: backend
+        run: |
+          python -m pip install -U pip
+          pip install -r requirements.txt
+          pip install black ruff
+
+      - name: Auto-format backend (black + ruff --fix)
+        run: |
+          black backend
+          ruff check backend --fix
+
+      - name: Commit & push backend formatting (if changed)
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(ci): auto-format backend (black, ruff --fix)"
+          commit_user_name: "edgeiq-ci-bot"
+          commit_user_email: "edgeiq-ci-bot@users.noreply.github.com"
+          file_pattern: backend/**
+
+  backend-lint:
+    runs-on: ubuntu-latest
+    needs: backend-format
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with:
+          python-version: "3.11"
+          cache: pip
       - name: Install deps
+        working-directory: backend
         run: |
-          cd backend
           python -m pip install -U pip
           pip install -r requirements.txt
-      - name: Lint backend
+          pip install black ruff
+      - name: Lint backend (ensure clean after auto-fix)
         run: |
-          pip install ruff black
           black --check backend
           ruff check backend
 
-  frontend:
+  frontend-format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-node@v4
-        with: { node-version: "20" }
-      - name: Install & build
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        working-directory: frontend
         run: |
-          cd frontend
+          npm ci || npm i
+          npx --yes prettier --version  # ensure prettier present via devDeps or npx
+
+      - name: Auto-format frontend (prettier -w)
+        working-directory: frontend
+        run: |
+          npx prettier -w "src/**/*.{js,jsx,ts,tsx,json,css,md}" || true
+
+      - name: Commit & push frontend formatting (if changed)
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(ci): auto-format frontend (prettier)"
+          commit_user_name: "edgeiq-ci-bot"
+          commit_user_email: "edgeiq-ci-bot@users.noreply.github.com"
+          file_pattern: frontend/**
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    needs: frontend-format
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install & build
+        working-directory: frontend
+        run: |
           npm ci || npm i
           npm run build
