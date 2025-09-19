@@ -14,6 +14,17 @@ services:
       timeout: 3s
       retries: 20
 
+  migrator:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.migrations
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/edgeiq
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   backend:
     build: ../backend
     environment:
@@ -23,11 +34,25 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
 
   frontend:
     build: ../frontend
     ports:
       - "5173:80"
+    depends_on:
+      backend:
+        condition: service_started
+
+  agent:
+    build: ../edge-agent
+    environment:
+      API_URL: http://backend:8000/api/v1/events
+      TENANT: demo
+      AGENT_ID: dev-mac
+      INTERVAL: 3
+      BATCH: 4
     depends_on:
       backend:
         condition: service_started

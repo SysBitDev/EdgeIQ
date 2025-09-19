@@ -1,8 +1,10 @@
 from fastapi import APIRouter
 
-router = APIRouter(tags=["health"])
+from ...schemas.event import HealthOut
+
+router = APIRouter(prefix="/api/v1", tags=["health"])
 
 
-@router.get("/healthz")
+@router.get("/healthz", response_model=HealthOut)
 def healthz():
-    return {"ok": True}
+    return HealthOut(ok=True)
