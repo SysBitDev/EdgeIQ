@@ -53,7 +53,9 @@ export default function App() {
           offset = data.next_offset;
         }
         // нормалізуємо під графік [{ts, value}]
-        const normalized = acc.map((e) => ({ ts: e.ts, value: e.value })).sort((a, b) => a.ts - b.ts);
+        const normalized = acc
+          .map((e) => ({ ts: e.ts, value: e.value }))
+          .sort((a, b) => a.ts - b.ts);
         setHistory(normalized);
       } catch (e) {
         console.error(e);
@@ -92,19 +94,35 @@ export default function App() {
   }, []);
 
   return (
-    <div style={{ fontFamily: "ui-sans-serif", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
+    <div
+      style={{
+        fontFamily: "ui-sans-serif",
+        padding: 24,
+        maxWidth: 1100,
+        margin: "0 auto",
+      }}
+    >
       <h1 style={{ textAlign: "center", marginBottom: 8 }}>EdgeIQ Dashboard</h1>
       <p style={{ textAlign: "center", color: "#666", marginTop: 0 }}>
         Real-time agent metrics and full historical view
       </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: 20 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 20,
+          marginTop: 20,
+        }}
+      >
         <HealthCard health={health} />
         <EventsCard count={count} />
       </div>
 
       <div style={{ marginTop: 30 }}>
-        {loading && <div style={{ color: "#666", marginBottom: 8 }}>Loading history…</div>}
+        {loading && (
+          <div style={{ color: "#666", marginBottom: 8 }}>Loading history…</div>
+        )}
         <HistoricalChart data={history} title="CPU usage history" />
         <div style={{ marginTop: 8, fontSize: 12, color: "#666" }}>
           Tip: use mouse wheel to zoom, click-and-drag to pan.

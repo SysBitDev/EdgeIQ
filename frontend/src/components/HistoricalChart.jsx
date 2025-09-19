@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef } from "react";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 
-
 function attachInteractions(u) {
   let dragging = false;
   let startX = 0;
@@ -45,7 +44,8 @@ function attachInteractions(u) {
     const dx = e.clientX - startX;
     const { width } = u.over.getBoundingClientRect();
     const scaleX = u.series[0].scale;
-    const span = (u.scales[scaleX].max ?? xMax0) - (u.scales[scaleX].min ?? xMin0);
+    const span =
+      (u.scales[scaleX].max ?? xMax0) - (u.scales[scaleX].min ?? xMin0);
     const shift = (dx / width) * span;
     u.setScale(scaleX, { min: xMin0 - shift, max: xMax0 - shift });
   };
