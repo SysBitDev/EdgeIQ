@@ -1,32 +1,36 @@
-import logging
-from typing import Set
+import asyncio
+from typing import Any, Set
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-router = APIRouter(tags=["ws"])
-log = logging.getLogger("ws")
+router = APIRouter(prefix="/api/v1", tags=["ws"])
 
-clients: Set[WebSocket] = set()
+_connections: Set[WebSocket] = set()
+_lock = asyncio.Lock()
 
 
-@router.websocket("/ws/telemetry")
-async def ws_telemetry(ws: WebSocket):
+@router.websocket("/ws")
+async def ws_endpoint(ws: WebSocket):
     await ws.accept()
-    clients.add(ws)
+    async with _lock:
+        _connections.add(ws)
     try:
         while True:
             await ws.receive_text()
     except WebSocketDisconnect:
-        clients.discard(ws)
+        pass
+    finally:
+        async with _lock:
+            _connections.discard(ws)
 
 
-async def broadcast(event: dict):
+async def broadcast_event(payload: Any):
     dead = []
-    for c in list(clients):
-        try:
-            await c.send_json(event)
-        except Exception as exc:
-            log.debug("Broadcast to client failed: %r", exc)
-            dead.append(c)
-    for d in dead:
-        clients.discard(d)
+    async with _lock:
+        for c in list(_connections):
+            try:
+                await c.send_json(payload)
+            except Exception:
+                dead.append(c)
+        for d in dead:
+            _connections.discard(d)
