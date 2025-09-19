@@ -51,8 +51,9 @@ services:
       API_URL: http://backend:8000/api/v1/events
       TENANT: demo
       AGENT_ID: dev-mac
+      SECRET: dev-secret
+      BATCH: 5
       INTERVAL: 3
-      BATCH: 4
     depends_on:
       backend:
         condition: service_started
