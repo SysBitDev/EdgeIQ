@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -21,3 +21,9 @@ class CountOut(BaseModel):
 
 class HealthOut(BaseModel):
     ok: Literal[True]
+
+
+class EventsPage(BaseModel):
+    items: List[EventOut]
+    total: int
+    next_offset: Optional[int] = None
